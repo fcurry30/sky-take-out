@@ -1,0 +1,8 @@
+**/target/
+.idea
+*.iml
+*.class
+*Test.java
+**/test/
+sky-take-out/sky-server/src/main/resources/application-dev.yml
+.idea/
