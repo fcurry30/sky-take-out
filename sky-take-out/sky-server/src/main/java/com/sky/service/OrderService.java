@@ -37,4 +37,9 @@ public interface OrderService {
      * 订单详情查看
      */
     OrderVO orderDetailCheck(Long id);
+
+    /**
+     * 订单取消
+     */
+    void orderCancelById(Long id);
 }

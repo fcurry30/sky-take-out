@@ -23,6 +23,7 @@ import io.swagger.annotations.ApiOperation;
 import org.aspectj.weaver.ast.Or;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.core.annotation.Order;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -186,6 +187,31 @@ public class OrderServiceImpl implements OrderService {
         BeanUtils.copyProperties(orders,orderVO);
         orderVO.setOrderDetailList(orderDetailList);
         return orderVO;
+    }
+
+    /**
+     * 订单取消
+     */
+    public void orderCancelById(Long id){
+        Orders orders = orderMapper.getById(id);
+        if(orders == null){
+            throw new OrderBusinessException(MessageConstant.ORDER_NOT_FOUND);
+        }
+        Integer status = orders.getStatus();
+        if(status > 2){
+            throw new OrderBusinessException(MessageConstant.ORDER_STATUS_ERROR);
+        }
+        //为了避免不必要的更新，new一个新的对象更新
+        Orders newOrders = new Orders();
+        newOrders.setId(id);
+        if(status == Orders.TO_BE_CONFIRMED){
+            //要退款,退款逻辑不进行书写
+            newOrders.setPayStatus(Orders.REFUND);
+        }
+        newOrders.setStatus(Orders.CANCELLED);
+        newOrders.setCancelReason("用户自行取消");
+        newOrders.setCancelTime(LocalDateTime.now());
+        orderMapper.update(newOrders);
     }
 
 }
