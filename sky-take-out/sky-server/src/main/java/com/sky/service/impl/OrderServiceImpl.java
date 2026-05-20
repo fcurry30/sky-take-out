@@ -31,6 +31,7 @@ import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Service
 public class OrderServiceImpl implements OrderService {
@@ -214,4 +215,32 @@ public class OrderServiceImpl implements OrderService {
         orderMapper.update(newOrders);
     }
 
+    /**
+     * 再来一单
+     * @param id
+     */
+    @Transactional
+    public void orderAgain(Long id){
+        //再来一单实际上往购物车加新的数据
+        Long userId = BaseContext.getCurrentId();
+        shoppingCartMapper.delete(userId);//先把当前购物车清空
+        //要获取订单明细表
+        List<OrderDetail> list = orderDetailMapper.getByOrderId(id);
+        for (OrderDetail orderDetail : list) {
+            ShoppingCart shoppingCart = new ShoppingCart();
+            BeanUtils.copyProperties(orderDetail,shoppingCart,"id");//要忽略id这个主键值
+            shoppingCart.setUserId(userId);
+            shoppingCart.setCreateTime(LocalDateTime.now());
+            shoppingCartMapper.insert(shoppingCart);
+        }
+        //下为批量插入数据的代码，官方答案代码
+//        List<ShoppingCart> id1 = list.stream().map(x -> {
+//            ShoppingCart shoppingCart = new ShoppingCart();
+//            BeanUtils.copyProperties(x, shoppingCart, "id");
+//            shoppingCart.setUserId(userId);
+//            shoppingCart.setCreateTime(LocalDateTime.now());
+//            return shoppingCart;
+//        }).collect(Collectors.toList());
+//        shoppingCartMapper.insertBatch(id1);
+    }
 }

@@ -42,4 +42,10 @@ public interface OrderService {
      * 订单取消
      */
     void orderCancelById(Long id);
+
+    /**
+     * 再来一单
+     * @param id
+     */
+    void orderAgain(Long id);
 }
