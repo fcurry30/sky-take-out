@@ -19,6 +19,8 @@ import com.sky.utils.WeChatPayUtil;
 import com.sky.vo.OrderPaymentVO;
 import com.sky.vo.OrderSubmitVO;
 import com.sky.vo.OrderVO;
+import io.swagger.annotations.ApiOperation;
+import org.aspectj.weaver.ast.Or;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -71,6 +73,7 @@ public class OrderServiceImpl implements OrderService {
         orders.setPhone(addressBook.getPhone());//从地址簿中获取电话
         orders.setConsignee(addressBook.getConsignee());
         orders.setUserId(userId);
+        orders.setAddress(addressBook.getDetail());
         orderMapper.insert(orders);
         //向订单明细表插入n条数据
         List<OrderDetail> orderDetailList = new ArrayList<>();
@@ -174,5 +177,15 @@ public class OrderServiceImpl implements OrderService {
         return new PageResult(pageresult.getTotal(),list);
     }
 
+
+    public OrderVO orderDetailCheck(Long id){
+        OrderVO orderVO = new OrderVO();
+        //分别查询获得orders和orderdetail
+        Orders orders = orderMapper.getById(id);
+        List<OrderDetail> orderDetailList = orderDetailMapper.getByOrderId(id);
+        BeanUtils.copyProperties(orders,orderVO);
+        orderVO.setOrderDetailList(orderDetailList);
+        return orderVO;
+    }
 
 }

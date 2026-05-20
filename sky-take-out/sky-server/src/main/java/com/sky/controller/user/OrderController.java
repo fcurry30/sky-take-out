@@ -60,9 +60,10 @@ public class OrderController {
     /**
      * 订单详情查询
      */
-    @GetMapping("/orderdetail/{id}")
+    @GetMapping("/orderDetail/{id}")
     @ApiOperation("订单详情查询")
     public Result<OrderVO> orderDetailCheck(@PathVariable Long id){
-        return Result.success();
+        OrderVO orderVO = orderService.orderDetailCheck(id);
+        return Result.success(orderVO);
     }
 }
