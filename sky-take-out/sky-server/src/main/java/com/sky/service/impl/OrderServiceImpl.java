@@ -17,6 +17,7 @@ import com.sky.result.PageResult;
 import com.sky.service.OrderService;
 import com.sky.utils.WeChatPayUtil;
 import com.sky.vo.OrderPaymentVO;
+import com.sky.vo.OrderStatisticsVO;
 import com.sky.vo.OrderSubmitVO;
 import com.sky.vo.OrderVO;
 import io.swagger.annotations.ApiOperation;
@@ -219,7 +220,6 @@ public class OrderServiceImpl implements OrderService {
      * 再来一单
      * @param id
      */
-    @Transactional
     public void orderAgain(Long id){
         //再来一单实际上往购物车加新的数据
         Long userId = BaseContext.getCurrentId();
@@ -242,5 +242,68 @@ public class OrderServiceImpl implements OrderService {
 //            return shoppingCart;
 //        }).collect(Collectors.toList());
 //        shoppingCartMapper.insertBatch(id1);
+    }
+
+    /**
+     * 管理端订单搜索
+     * @param ordersPageQueryDTO
+     * @return
+     */
+    public PageResult conditionSearch(OrdersPageQueryDTO ordersPageQueryDTO){
+        PageHelper.startPage(ordersPageQueryDTO.getPage(),ordersPageQueryDTO.getPageSize());
+        Page<Orders> page = orderMapper.pageQuery(ordersPageQueryDTO);
+        List<OrderVO> list = order2Vo(page);
+        return new PageResult(page.getTotal(),list);
+    }
+
+
+
+    /**
+     * 把orders转换成VO对象给管理端前端展示
+     * @param page
+     * @return
+     */
+    private List<OrderVO> order2Vo(Page<Orders> page){
+        List<OrderVO> list = new ArrayList<>();
+        List<Orders> result = page.getResult();
+        if(result != null && result.size() > 0){
+            for (Orders orders : result) {
+                OrderVO orderVO = new OrderVO();
+                BeanUtils.copyProperties(orders,orderVO);
+                String orderDishesStr = getOrderDishesStr(orders);
+                orderVO.setOrderDishes(orderDishesStr);
+                list.add(orderVO);
+            }
+        }
+        return list;
+    }
+
+    /**
+     * 根据orders获取orderdetail从而拼接菜品信息，生成字符串
+     * @param orders
+     * @return
+     */
+    private String getOrderDishesStr(Orders orders){
+        List<OrderDetail> orderDetailList = orderDetailMapper.getByOrderId(orders.getId());
+        List<String> collect = orderDetailList.stream().map(x -> {
+            String result = x.getName() + "*" + x.getNumber() + ";";
+            return result;
+        }).collect(Collectors.toList());
+        return String.join("",collect);
+    }
+
+    /**
+     * 获取订单状态的数量，封装到VO里面，返回给前端
+     * @return
+     */
+    public OrderStatisticsVO getStatistics() {
+        Integer DIP = orderMapper.getNumber(Orders.DELIVERY_IN_PROGRESS);
+        Integer TBC = orderMapper.getNumber(Orders.TO_BE_CONFIRMED);
+        Integer C = orderMapper.getNumber(Orders.CONFIRMED);
+        OrderStatisticsVO orderStatisticsVO = new OrderStatisticsVO();
+        orderStatisticsVO.setConfirmed(C);
+        orderStatisticsVO.setToBeConfirmed(TBC);
+        orderStatisticsVO.setDeliveryInProgress(DIP);
+        return orderStatisticsVO;
     }
 }
