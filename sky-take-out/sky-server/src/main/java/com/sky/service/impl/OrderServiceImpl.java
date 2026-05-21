@@ -5,6 +5,7 @@ import com.github.pagehelper.Page;
 import com.github.pagehelper.PageHelper;
 import com.sky.constant.MessageConstant;
 import com.sky.context.BaseContext;
+import com.sky.dto.OrdersConfirmDTO;
 import com.sky.dto.OrdersPageQueryDTO;
 import com.sky.dto.OrdersPaymentDTO;
 import com.sky.dto.OrdersSubmitDTO;
@@ -76,7 +77,8 @@ public class OrderServiceImpl implements OrderService {
         orders.setPhone(addressBook.getPhone());//从地址簿中获取电话
         orders.setConsignee(addressBook.getConsignee());
         orders.setUserId(userId);
-        orders.setAddress(addressBook.getDetail());
+        orders.setAddress(addressBook.getProvinceName() + addressBook.getCityName() +addressBook.getDistrictName()
+                + addressBook.getDetail());
         orderMapper.insert(orders);
         //向订单明细表插入n条数据
         List<OrderDetail> orderDetailList = new ArrayList<>();
@@ -306,4 +308,27 @@ public class OrderServiceImpl implements OrderService {
         orderStatisticsVO.setDeliveryInProgress(DIP);
         return orderStatisticsVO;
     }
+
+    /**
+     * 通过id查询orders和orderid
+     * @return
+     */
+    public OrderVO getDetailsById(Long id) {
+        Orders orders = orderMapper.getById(id);
+        List<OrderDetail> orderDetailList = orderDetailMapper.getByOrderId(id);
+        OrderVO orderVO = new OrderVO();
+        BeanUtils.copyProperties(orders,orderVO);
+        orderVO.setOrderDetailList(orderDetailList);
+        return orderVO;
+    }
+
+    public void setConfirm(OrdersConfirmDTO ordersConfirmDTO) {
+        Long orderId = ordersConfirmDTO.getId();
+        Orders orders = Orders.builder()
+                .id(orderId)
+                .status(Orders.CONFIRMED)
+                .build();
+        orderMapper.update(orders);
+    }
+
 }
