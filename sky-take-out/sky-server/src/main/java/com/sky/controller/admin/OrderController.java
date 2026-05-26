@@ -1,8 +1,10 @@
 package com.sky.controller.admin;
 
 import com.github.pagehelper.Page;
+import com.sky.dto.OrdersCancelDTO;
 import com.sky.dto.OrdersConfirmDTO;
 import com.sky.dto.OrdersPageQueryDTO;
+import com.sky.dto.OrdersRejectionDTO;
 import com.sky.entity.OrderDetail;
 import com.sky.result.PageResult;
 import com.sky.result.Result;
@@ -36,13 +38,27 @@ public class OrderController {
         return Result.success(orderStatisticsVO);
     }
     @GetMapping("/details/{id}")
+    @ApiOperation("商户端订单详情查看")
     public Result<OrderVO> getDetails(@PathVariable Long id){
         OrderVO orderVO = orderService.getDetailsById(id);
         return Result.success(orderVO);
     }
     @PutMapping("/confirm")
+    @ApiOperation("商户端接单")
     public Result setConfirm(@RequestBody OrdersConfirmDTO ordersConfirmDTO){
         orderService.setConfirm(ordersConfirmDTO);
+        return Result.success();
+    }
+    @PutMapping("/rejection")
+    @ApiOperation("商户端拒单")
+    public Result setReject(@RequestBody OrdersRejectionDTO ordersRejectionDTO){
+        orderService.setReject(ordersRejectionDTO);
+        return Result.success();
+    }
+    @PutMapping("/cancel")
+    @ApiOperation("商户端取消订单")
+    public Result setCancel(@RequestBody OrdersCancelDTO ordersCancelDTO){
+        orderService.setCancel(ordersCancelDTO);
         return Result.success();
     }
 
