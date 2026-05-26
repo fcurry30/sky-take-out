@@ -53,12 +53,29 @@ public class OrderController {
     @ApiOperation("商户端拒单")
     public Result setReject(@RequestBody OrdersRejectionDTO ordersRejectionDTO){
         orderService.setReject(ordersRejectionDTO);
+        log.info("商户端拒单");
         return Result.success();
     }
     @PutMapping("/cancel")
     @ApiOperation("商户端取消订单")
     public Result setCancel(@RequestBody OrdersCancelDTO ordersCancelDTO){
         orderService.setCancel(ordersCancelDTO);
+        log.info("商户端取消订单");
+        return Result.success();
+    }
+
+    @PutMapping("/delivery/{id}")
+    @ApiOperation("商户端派送订单")
+    public Result setDelivery(@PathVariable("id") Long id){
+        orderService.setDelivery(id);
+        log.info("商户端派送订单");
+        return Result.success();
+    }
+    @PutMapping("/complete/{id}")
+    @ApiOperation("商户端完成派送")
+    public Result setComplete(@PathVariable("id") Long id){
+        orderService.setComplete(id);
+        log.info("商户端完成派送");
         return Result.success();
     }
 

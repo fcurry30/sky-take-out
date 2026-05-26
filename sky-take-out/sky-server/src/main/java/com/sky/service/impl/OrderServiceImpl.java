@@ -371,4 +371,35 @@ public class OrderServiceImpl implements OrderService {
         orderMapper.update(build);
     }
 
+    /**
+     * 商家派单功能
+     * @param id
+     */
+    public void setDelivery(Long id){
+        Orders orders = orderMapper.getById(id);
+        if(orders == null || !orders.getStatus().equals(Orders.CONFIRMED)){//需要先判空再获取数据
+            throw new OrderBusinessException(MessageConstant.ORDER_STATUS_ERROR);
+        }
+        Orders orders1 = new Orders();
+        orders1.setId(id);
+        orders1.setStatus(Orders.DELIVERY_IN_PROGRESS);
+        orderMapper.update(orders1);
+    }
+
+    /**
+     * 商户端完成派送
+     * @param id
+     */
+    public void setComplete(Long id){
+        Orders orders = orderMapper.getById(id);
+        if(orders == null || !orders.getStatus().equals(Orders.DELIVERY_IN_PROGRESS)){
+            throw new OrderBusinessException(MessageConstant.ORDER_STATUS_ERROR);
+        }
+        Orders orders1 = new Orders();
+        orders1.setId(id);
+        orders1.setStatus(Orders.COMPLETED);
+        orders1.setDeliveryTime(LocalDateTime.now());
+        orderMapper.update(orders1);
+    }
+
 }

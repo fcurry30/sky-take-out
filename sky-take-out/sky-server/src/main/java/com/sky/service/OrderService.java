@@ -78,4 +78,16 @@ public interface OrderService {
     void setReject(OrdersRejectionDTO ordersRejectionDTO);
 
     void setCancel(OrdersCancelDTO ordersCancelDTO);
+
+    /**
+     * 商家派送订单功能
+     * @param id
+     */
+    void setDelivery(Long id);
+
+    /**
+     * 商户端完成派送
+     * @param id
+     */
+    void setComplete(Long id);
 }
