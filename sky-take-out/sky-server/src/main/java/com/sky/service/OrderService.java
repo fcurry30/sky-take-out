@@ -90,4 +90,6 @@ public interface OrderService {
      * @param id
      */
     void setComplete(Long id);
+
+    void reminder(Long id);
 }
