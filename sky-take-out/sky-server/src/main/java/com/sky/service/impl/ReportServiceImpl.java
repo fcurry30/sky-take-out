@@ -1,15 +1,17 @@
 package com.sky.service.impl;
 
-import com.alibaba.druid.util.StringUtils;
+import com.sky.dto.GoodsSalesDTO;
 import com.sky.entity.Orders;
 import com.sky.mapper.OrderMapper;
 import com.sky.mapper.UserMapper;
 import com.sky.service.ReportService;
 import com.sky.vo.OrderReportVO;
+import com.sky.vo.SalesTop10ReportVO;
 import com.sky.vo.TurnoverReportVO;
 import com.sky.vo.UserReportVO;
 import io.swagger.models.auth.In;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.poi.util.StringUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -21,6 +23,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 @Service
 @Slf4j
@@ -59,8 +62,8 @@ public class ReportServiceImpl implements ReportService {
             turnoverList.add(v);
         }
         //拼接字符串，返回结果
-        String join = StringUtil.join(",", dateList);
-        String join1 = StringUtil.join(",", turnoverList);
+        String join = StringUtils.join(dateList,",");
+        String join1 = StringUtils.join( turnoverList,",");
         TurnoverReportVO turnoverReportVO = new TurnoverReportVO();
         turnoverReportVO.setDateList(join);
         turnoverReportVO.setTurnoverList(join1);
@@ -98,9 +101,9 @@ public class ReportServiceImpl implements ReportService {
             totalUserList.add(totalUser);
         }
         return UserReportVO.builder()
-                .dateList(StringUtil.join(",",dateList))
-                .newUserList(StringUtil.join(",",newUserList))
-                .totalUserList(StringUtil.join(",",totalUserList))
+                .dateList(StringUtils.join(dateList,","))
+                .newUserList(StringUtils.join(newUserList,","))
+                .totalUserList(StringUtils.join(totalUserList,","))
                 .build();
     }
     /**
@@ -139,14 +142,35 @@ public class ReportServiceImpl implements ReportService {
         }
         OrderReportVO vo = OrderReportVO.builder()
                 .orderCompletionRate(orderCompleteRate)
-                .orderCountList(StringUtil.join(",", orderList))
-                .validOrderCountList(StringUtil.join(",", validList))
-                .dateList(StringUtil.join(",", dateList))
+                .orderCountList(StringUtils.join(orderList,","))
+                .validOrderCountList(StringUtils.join(validList,","))
+                .dateList(StringUtils.join(dateList,","))
                 .validOrderCount(totalValidCount)
                 .totalOrderCount(totalOrderCount)
                 .build();
         return vo;
     }
+
+    /**
+     * 统计销量top10
+     * @param begin
+     * @param end
+     * @return
+     */
+    public SalesTop10ReportVO getSalesStatistics(LocalDate begin, LocalDate end) {
+        LocalDateTime begintime = LocalDateTime.of(begin, LocalTime.MIN);
+        LocalDateTime endtime = LocalDateTime.of(end, LocalTime.MAX);
+        List<GoodsSalesDTO> salesTop10 = orderMapper.getSalesTop10(begintime, endtime);
+        List<String> collect = salesTop10.stream().map(GoodsSalesDTO::getName).collect(Collectors.toList());
+        String join = StringUtils.join(collect,",");
+        List<Integer> collect1 = salesTop10.stream().map(GoodsSalesDTO::getNumber).collect(Collectors.toList());
+        String join1 = StringUtils.join(collect1,",");
+        return SalesTop10ReportVO.builder()
+                .nameList(join)
+                .numberList(join1)
+                .build();
+    }
+
     private Integer getOrderCount(LocalDateTime begin,LocalDateTime end,Integer status){
         Map<String,Object> map = new HashMap<>();
         map.put("begin",begin);
